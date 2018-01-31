@@ -1,9 +1,8 @@
 var inquirer = require('inquirer');
 var mysql = require('mysql');
+require("console.table")
 var Table = require('cli-table');
-
-
- 
+require("console.table")
 
 
 // Define the MySQL connection parameters
@@ -14,11 +13,24 @@ var connection = mysql.createConnection({
     password: '',
     database: 'bamazon_db'
 });
-
 // connection.connect(function (err) {
 //     if (err) throw err;
 //     console.log('connected as id: ' + connection.threadId)
+    
 // });
+
+
+const displayTable = () => {
+    let query = 'SELECT * FROM products';
+    connection.query(query, (error, data) => {
+        if (error) throw error;
+        console.table(data);
+        buyerID();
+        
+        //
+
+    })
+};
 
 const buyerID = () => {
     inquirer.prompt([{
@@ -34,7 +46,7 @@ const buyerID = () => {
         let input = answers.itemID
         let unitAmount = parseInt(answers.units)
         let query = 'SELECT product_name, price, stock_quantity FROM products WHERE itemID=?';
-        connection.query(query, [input], (error, data) => {            
+        connection.query(query, [input], (error, data) => {
             if (error) {
                 throw error;
             } else {
@@ -56,33 +68,32 @@ const buyerID = () => {
                     // console.log('stockQuantity', stockQuantity)
                     // console.log('unitAmount', unitAmount)
                     connection.query(
-                        "UPDATE products SET ? WHERE ?",
-                        [
-                            {
+                        "UPDATE products SET ? WHERE ?", [{
                                 stock_quantity: newQuantity
                             },
                             {
                                 itemID: input
                             }
                         ],
-                
-                        function(err, res){
+
+                        function (err, res) {
                             if (error) {
                                 throw error;
                             } else {
                                 console.log("$" + totalPrice);
-                                return;
+                                displayTable();
+                                // return;
                             }
                         }
                     )
-                }         
+                }
             }
 
 
         });
     });
 }
-buyerID();
+displayTable();
 
 // take my ID value, query the DB (use select statement). 
 // save the price of the unit to a variable, calculate my totals, 
